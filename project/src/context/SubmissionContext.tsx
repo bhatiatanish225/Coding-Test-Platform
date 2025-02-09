@@ -22,6 +22,23 @@ export interface Submission {
   submissions: {
     [key: number]: QuestionSubmission;
   };
+  totalQuestions: number;
+  completedQuestions: number;
+  detailedResults: Array<{
+    questionId: number;
+    title: string;
+    description: string;
+    code: string;
+    language: string;
+    passed: boolean;
+    testResults: TestResult[];
+    totalTestCases: number;
+    passedTestCases: number;
+  }>;
+  overallScore: {
+    totalTestCases: number;
+    passedTestCases: number;
+  };
 }
 
 interface SubmissionContextType {

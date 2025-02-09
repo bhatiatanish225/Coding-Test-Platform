@@ -2,26 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { Code2, Clock, User, CheckCircle, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSubmissions } from '../context/SubmissionContext';
-
-interface Submission {
-  id: string;
-  username: string;
-  submittedAt: string;
-  timeSpent: number;
-  submissions: {
-    [key: number]: {
-      code: string;
-      language: string;
-      passed: boolean;
-      testResults: Array<{
-        passed: boolean;
-        input: string;
-        expected: string;
-        actual: string;
-      }>;
-    };
-  };
-}
+import { Submission } from '../context/SubmissionContext';
 
 const AdminDashboard = () => {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -91,6 +72,11 @@ const AdminDashboard = () => {
                     <div className="text-sm text-gray-500 mt-1">
                       Submitted: {formatDate(submission.submittedAt)}
                     </div>
+                    <div className="mt-2 text-sm">
+                      <span className="text-purple-600 font-medium">
+                        Score: {submission.overallScore.passedTestCases}/{submission.overallScore.totalTestCases} tests passed
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
@@ -107,52 +93,55 @@ const AdminDashboard = () => {
                     <p>User: {selectedSubmission.username}</p>
                     <p>Submitted: {formatDate(selectedSubmission.submittedAt)}</p>
                     <p>Time Spent: {formatTime(selectedSubmission.timeSpent)}</p>
+                    <p className="mt-2 text-purple-600">
+                      Overall Score: {selectedSubmission.overallScore.passedTestCases}/{selectedSubmission.overallScore.totalTestCases} tests passed
+                    </p>
                   </div>
                 </div>
 
-                {Object.entries(selectedSubmission.submissions).map(([questionId, submission]) => (
-                  <div key={questionId} className="mb-6 last:mb-0">
-                    <h3 className="text-lg font-semibold mb-2">
-                      Question {parseInt(questionId) + 1}
-                    </h3>
-                    <div className="bg-gray-50 p-4 rounded mb-4">
-                      <div className="flex items-center justify-between mb-2">
-                        <span className="text-gray-700">Language: {submission.language}</span>
-                        <span className={`flex items-center ${
-                          submission.passed ? 'text-green-600' : 'text-red-600'
-                        }`}>
-                          {submission.passed ? (
-                            <CheckCircle className="h-4 w-4 mr-1" />
-                          ) : (
-                            <XCircle className="h-4 w-4 mr-1" />
-                          )}
-                          {submission.passed ? 'Passed' : 'Failed'}
+                {selectedSubmission.detailedResults.map((result, index) => (
+                  <div key={index} className="mb-8 last:mb-0">
+                    <div className="border-b pb-2 mb-4">
+                      <h3 className="text-lg font-semibold">
+                        Question {index + 1}: {result.title}
+                      </h3>
+                      <p className="text-gray-600 mt-1">{result.description}</p>
+                      <div className="mt-2 flex items-center space-x-4">
+                        <span className="text-gray-600">Language: {result.language}</span>
+                        <span className={result.passed ? 'text-green-600' : 'text-red-600'}>
+                          {result.passedTestCases}/{result.totalTestCases} tests passed
                         </span>
                       </div>
+                    </div>
+
+                    <div className="mb-4">
+                      <h4 className="font-semibold mb-2">Submitted Code:</h4>
                       <pre className="bg-gray-900 text-white p-4 rounded overflow-x-auto">
-                        <code>{submission.code}</code>
+                        <code>{result.code}</code>
                       </pre>
                     </div>
 
-                    <div className="space-y-2">
-                      <h4 className="font-semibold">Test Results:</h4>
-                      {submission.testResults.map((result, index) => (
-                        <div key={index} className="bg-gray-50 p-3 rounded">
-                          <div className="flex items-center mb-1">
-                            {result.passed ? (
-                              <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-                            ) : (
-                              <XCircle className="h-4 w-4 text-red-600 mr-2" />
-                            )}
-                            <span className="font-medium">Test Case {index + 1}</span>
+                    <div>
+                      <h4 className="font-semibold mb-2">Test Results:</h4>
+                      <div className="space-y-2">
+                        {result.testResults.map((test, testIndex) => (
+                          <div key={testIndex} className="bg-gray-50 p-3 rounded">
+                            <div className="flex items-center mb-1">
+                              {test.passed ? (
+                                <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                              ) : (
+                                <XCircle className="h-4 w-4 text-red-600 mr-2" />
+                              )}
+                              <span className="font-medium">Test Case {testIndex + 1}</span>
+                            </div>
+                            <div className="text-sm text-gray-600 ml-6">
+                              <p>Input: {test.input}</p>
+                              <p>Expected: {test.expected}</p>
+                              <p>Actual: {test.actual}</p>
+                            </div>
                           </div>
-                          <div className="text-sm text-gray-600 ml-6">
-                            <p>Input: {result.input}</p>
-                            <p>Expected: {result.expected}</p>
-                            <p>Actual: {result.actual}</p>
-                          </div>
-                        </div>
-                      ))}
+                        ))}
+                      </div>
                     </div>
                   </div>
                 ))}
