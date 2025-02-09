@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Code2, Clock, User, CheckCircle, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSubmissions } from '../context/SubmissionContext';
-import { Submission } from '../context/SubmissionContext';
+import { Submission, TestResult } from '../context/SubmissionContext';
 
 const AdminDashboard = () => {
   const { isAuthenticated, isAdmin } = useAuth();
@@ -42,7 +42,6 @@ const AdminDashboard = () => {
 
       <div className="container mx-auto p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Submissions List */}
           <div className="bg-white rounded-lg shadow p-4">
             <h2 className="text-lg font-semibold mb-4">Recent Submissions</h2>
             {submissions.length === 0 ? (
@@ -88,7 +87,6 @@ const AdminDashboard = () => {
             )}
           </div>
 
-          {/* Submission Details */}
           <div className="md:col-span-2">
             {selectedSubmission ? (
               <div className="bg-white rounded-lg shadow p-4">
@@ -132,7 +130,7 @@ const AdminDashboard = () => {
                       <div>
                         <h4 className="font-semibold mb-2">Test Results:</h4>
                         <div className="space-y-2">
-                          {result.testResults.map((test, testIndex) => (
+                          {result.testResults.map((test: TestResult, testIndex: number) => (
                             <div key={testIndex} className="bg-gray-50 p-3 rounded">
                               <div className="flex items-center mb-1">
                                 {test.passed ? (

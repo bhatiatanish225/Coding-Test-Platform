@@ -16,25 +16,19 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [username, setUsername] = useState<string | null>(null);
 
   const login = async (username: string, password: string) => {
-    // Clear previous state
     setIsAuthenticated(false);
     setIsAdmin(false);
     setUsername(null);
 
-    // Admin credentials
     if (username === 'admin' && password === 'admin123') {
       setIsAuthenticated(true);
       setIsAdmin(true);
       setUsername(username);
-      console.log('Admin login successful'); // Debug log
       return true;
-    } 
-    // User credentials
-    else if (username === 'anjum_test' && password === 'Test@123') {
+    } else if (username === 'anjum_test' && password === 'Test@123') {
       setIsAuthenticated(true);
       setIsAdmin(false);
       setUsername(username);
-      console.log('User login successful'); // Debug log
       return true;
     }
     return false;

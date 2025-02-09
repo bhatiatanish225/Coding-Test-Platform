@@ -1,6 +1,6 @@
 import React, { createContext, useContext, useState } from 'react';
 
-interface TestResult {
+export interface TestResult {
   passed: boolean;
   input: string;
   expected: string;
@@ -22,9 +22,7 @@ export interface Submission {
   submissions: {
     [key: number]: QuestionSubmission;
   };
-  totalQuestions: number;
-  completedQuestions: number;
-  detailedResults: Array<{
+  detailedResults?: Array<{
     questionId: number;
     title: string;
     description: string;
@@ -35,7 +33,7 @@ export interface Submission {
     totalTestCases: number;
     passedTestCases: number;
   }>;
-  overallScore: {
+  overallScore?: {
     totalTestCases: number;
     passedTestCases: number;
   };
@@ -68,4 +66,4 @@ export const useSubmissions = () => {
     throw new Error('useSubmissions must be used within a SubmissionProvider');
   }
   return context;
-}; 
+};

@@ -225,12 +225,9 @@ const Assessment = () => {
   };
 
   const handleFinalSubmit = async () => {
-    // Add console log to debug submission data
-    console.log('Current submissions state:', submissions);
-    
+    // Get all question details with their test results
     const submissionDetails = questions.map((question, index) => {
       const submission = submissions[index];
-      console.log(`Processing question ${index}:`, submission); // Debug log
       return {
         questionId: question.id,
         title: question.title,
@@ -244,25 +241,26 @@ const Assessment = () => {
       };
     });
 
+    const totalTestCases = questions.reduce((acc, q) => acc + q.testCases.length, 0);
+    const passedTestCases = Object.values(submissions).reduce(
+      (acc, sub) => acc + (sub.testResults?.filter(t => t.passed).length || 0),
+      0
+    );
+
     const submissionData = {
       id: Date.now().toString(),
       username: username,
       submittedAt: new Date().toISOString(),
       timeSpent: 3600 - timeLeft,
-      totalQuestions: questions.length,
-      completedQuestions: Object.keys(submissions).length,
       submissions: submissions,
       detailedResults: submissionDetails,
       overallScore: {
-        totalTestCases: questions.reduce((acc, q) => acc + q.testCases.length, 0),
-        passedTestCases: Object.values(submissions).reduce(
-          (acc, sub) => acc + (sub.testResults?.filter(t => t.passed).length || 0),
-          0
-        ),
+        totalTestCases,
+        passedTestCases
       }
     };
     
-    console.log('Final submission data:', submissionData); // Debug log
+    console.log('Final submission:', submissionData);
     addSubmission(submissionData);
     setShowThankYouModal(true);
   };
