@@ -50,7 +50,12 @@ export const SubmissionProvider = ({ children }: { children: React.ReactNode }) 
   const [submissions, setSubmissions] = useState<Submission[]>([]);
 
   const addSubmission = (submission: Submission) => {
-    setSubmissions(prev => [...prev, submission]);
+    console.log('Adding submission to context:', submission); // Debug log
+    setSubmissions(prev => {
+      const newSubmissions = [...prev, submission];
+      console.log('Updated submissions list:', newSubmissions); // Debug log
+      return newSubmissions;
+    });
   };
 
   return (

@@ -209,31 +209,35 @@ const Assessment = () => {
   };
 
   const handleSubmitQuestion = async () => {
-    const { passed, results } = await validateTestCases();
-    
-    if (passed) {
+    const result = await validateTestCases();
+    console.log('Question submission result:', result); // Debug log
+
+    if (result.passed) {
+      const submission = {
+        code: code[language],
+        language,
+        passed: result.passed,
+        testResults: result.results
+      };
+      console.log('Adding submission for question:', currentQuestion, submission); // Debug log
       setSubmissions(prev => ({
         ...prev,
-        [currentQuestion]: {
-          code: code[language],
-          language,
-          passed: true,
-          testResults: results
-        }
+        [currentQuestion]: submission
       }));
     }
   };
 
   const handleFinalSubmit = async () => {
     const submissionData = {
-      id: Date.now().toString(), // Generate unique ID
+      id: Date.now().toString(),
       username: username,
       submittedAt: new Date().toISOString(),
       timeSpent: 3600 - timeLeft,
       submissions: submissions
     };
     
-    console.log('Final submission:', submissionData);
+    console.log('Final submission data:', submissionData); // Debug log
+    console.log('Current submissions state:', submissions); // Debug log
     addSubmission(submissionData);
     setShowThankYouModal(true);
   };

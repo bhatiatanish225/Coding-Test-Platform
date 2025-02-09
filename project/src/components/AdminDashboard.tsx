@@ -1,7 +1,14 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState } from 'react';
 import { Code2, Clock, User, CheckCircle, XCircle } from 'lucide-react';
 import { useAuth } from '../context/AuthContext';
 import { useSubmissions } from '../context/SubmissionContext';
+
+interface TestResult {
+  passed: boolean;
+  input: string;
+  expected: string;
+  actual: string;
+}
 
 interface Submission {
   id: string;
@@ -13,12 +20,7 @@ interface Submission {
       code: string;
       language: string;
       passed: boolean;
-      testResults: Array<{
-        passed: boolean;
-        input: string;
-        expected: string;
-        actual: string;
-      }>;
+      testResults: TestResult[];
     };
   };
 }
@@ -28,6 +30,9 @@ const AdminDashboard = () => {
   const { submissions } = useSubmissions();
   const [selectedSubmission, setSelectedSubmission] = useState<Submission | null>(null);
 
+  console.log('Admin Dashboard - All submissions:', submissions); // Debug log
+  console.log('Admin Dashboard - Auth status:', { isAuthenticated, isAdmin }); // Debug log
+
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
     const remainingSeconds = seconds % 60;
@@ -36,6 +41,18 @@ const AdminDashboard = () => {
 
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString();
+  };
+
+  const calculateScore = (submission: Submission) => {
+    let totalTests = 0;
+    let passedTests = 0;
+    
+    Object.values(submission.submissions).forEach(sub => {
+      totalTests += sub.testResults.length;
+      passedTests += sub.testResults.filter(test => test.passed).length;
+    });
+    
+    return `${passedTests}/${totalTests}`;
   };
 
   if (!isAuthenticated || !isAdmin) {
@@ -61,7 +78,6 @@ const AdminDashboard = () => {
 
       <div className="container mx-auto p-4">
         <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-          {/* Submissions List */}
           <div className="bg-white rounded-lg shadow p-4">
             <h2 className="text-lg font-semibold mb-4">Recent Submissions</h2>
             {submissions.length === 0 ? (
@@ -71,7 +87,10 @@ const AdminDashboard = () => {
                 {submissions.map((submission) => (
                   <div
                     key={submission.id}
-                    onClick={() => setSelectedSubmission(submission)}
+                    onClick={() => {
+                      console.log('Selected submission:', submission);
+                      setSelectedSubmission(submission);
+                    }}
                     className={`p-3 rounded cursor-pointer transition-colors ${
                       selectedSubmission?.id === submission.id
                         ? 'bg-purple-50 border-purple-200'
@@ -91,13 +110,17 @@ const AdminDashboard = () => {
                     <div className="text-sm text-gray-500 mt-1">
                       Submitted: {formatDate(submission.submittedAt)}
                     </div>
+                    <div className="mt-2 text-sm">
+                      <span className="text-purple-600 font-medium">
+                        Score: {calculateScore(submission)} tests passed
+                      </span>
+                    </div>
                   </div>
                 ))}
               </div>
             )}
           </div>
 
-          {/* Submission Details */}
           <div className="md:col-span-2">
             {selectedSubmission ? (
               <div className="bg-white rounded-lg shadow p-4">
@@ -107,11 +130,14 @@ const AdminDashboard = () => {
                     <p>User: {selectedSubmission.username}</p>
                     <p>Submitted: {formatDate(selectedSubmission.submittedAt)}</p>
                     <p>Time Spent: {formatTime(selectedSubmission.timeSpent)}</p>
+                    <p className="mt-2 text-purple-600">
+                      Overall Score: {calculateScore(selectedSubmission)} tests passed
+                    </p>
                   </div>
                 </div>
 
                 {Object.entries(selectedSubmission.submissions).map(([questionId, submission]) => (
-                  <div key={questionId} className="mb-6 last:mb-0">
+                  <div key={questionId} className="mb-6 last:mb-0 border-b pb-6">
                     <h3 className="text-lg font-semibold mb-2">
                       Question {parseInt(questionId) + 1}
                     </h3>
