@@ -52,7 +52,10 @@ const AdminDashboard = () => {
                 {submissions.map((submission) => (
                   <div
                     key={submission.id}
-                    onClick={() => setSelectedSubmission(submission)}
+                    onClick={() => {
+                      console.log('Selected submission:', submission); // Debug log
+                      setSelectedSubmission(submission);
+                    }}
                     className={`p-3 rounded cursor-pointer transition-colors ${
                       selectedSubmission?.id === submission.id
                         ? 'bg-purple-50 border-purple-200'
@@ -72,11 +75,13 @@ const AdminDashboard = () => {
                     <div className="text-sm text-gray-500 mt-1">
                       Submitted: {formatDate(submission.submittedAt)}
                     </div>
-                    <div className="mt-2 text-sm">
-                      <span className="text-purple-600 font-medium">
-                        Score: {submission.overallScore.passedTestCases}/{submission.overallScore.totalTestCases} tests passed
-                      </span>
-                    </div>
+                    {submission.overallScore && (
+                      <div className="mt-2 text-sm">
+                        <span className="text-purple-600 font-medium">
+                          Score: {submission.overallScore.passedTestCases}/{submission.overallScore.totalTestCases} tests passed
+                        </span>
+                      </div>
+                    )}
                   </div>
                 ))}
               </div>
@@ -93,13 +98,15 @@ const AdminDashboard = () => {
                     <p>User: {selectedSubmission.username}</p>
                     <p>Submitted: {formatDate(selectedSubmission.submittedAt)}</p>
                     <p>Time Spent: {formatTime(selectedSubmission.timeSpent)}</p>
-                    <p className="mt-2 text-purple-600">
-                      Overall Score: {selectedSubmission.overallScore.passedTestCases}/{selectedSubmission.overallScore.totalTestCases} tests passed
-                    </p>
+                    {selectedSubmission.overallScore && (
+                      <p className="mt-2 text-purple-600">
+                        Overall Score: {selectedSubmission.overallScore.passedTestCases}/{selectedSubmission.overallScore.totalTestCases} tests passed
+                      </p>
+                    )}
                   </div>
                 </div>
 
-                {selectedSubmission.detailedResults.map((result, index) => (
+                {selectedSubmission.detailedResults?.map((result, index) => (
                   <div key={index} className="mb-8 last:mb-0">
                     <div className="border-b pb-2 mb-4">
                       <h3 className="text-lg font-semibold">
@@ -117,32 +124,34 @@ const AdminDashboard = () => {
                     <div className="mb-4">
                       <h4 className="font-semibold mb-2">Submitted Code:</h4>
                       <pre className="bg-gray-900 text-white p-4 rounded overflow-x-auto">
-                        <code>{result.code}</code>
+                        <code>{result.code || 'No code submitted'}</code>
                       </pre>
                     </div>
 
-                    <div>
-                      <h4 className="font-semibold mb-2">Test Results:</h4>
-                      <div className="space-y-2">
-                        {result.testResults.map((test, testIndex) => (
-                          <div key={testIndex} className="bg-gray-50 p-3 rounded">
-                            <div className="flex items-center mb-1">
-                              {test.passed ? (
-                                <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
-                              ) : (
-                                <XCircle className="h-4 w-4 text-red-600 mr-2" />
-                              )}
-                              <span className="font-medium">Test Case {testIndex + 1}</span>
+                    {result.testResults && result.testResults.length > 0 && (
+                      <div>
+                        <h4 className="font-semibold mb-2">Test Results:</h4>
+                        <div className="space-y-2">
+                          {result.testResults.map((test, testIndex) => (
+                            <div key={testIndex} className="bg-gray-50 p-3 rounded">
+                              <div className="flex items-center mb-1">
+                                {test.passed ? (
+                                  <CheckCircle className="h-4 w-4 text-green-600 mr-2" />
+                                ) : (
+                                  <XCircle className="h-4 w-4 text-red-600 mr-2" />
+                                )}
+                                <span className="font-medium">Test Case {testIndex + 1}</span>
+                              </div>
+                              <div className="text-sm text-gray-600 ml-6">
+                                <p>Input: {test.input}</p>
+                                <p>Expected: {test.expected}</p>
+                                <p>Actual: {test.actual}</p>
+                              </div>
                             </div>
-                            <div className="text-sm text-gray-600 ml-6">
-                              <p>Input: {test.input}</p>
-                              <p>Expected: {test.expected}</p>
-                              <p>Actual: {test.actual}</p>
-                            </div>
-                          </div>
-                        ))}
+                          ))}
+                        </div>
                       </div>
-                    </div>
+                    )}
                   </div>
                 ))}
               </div>

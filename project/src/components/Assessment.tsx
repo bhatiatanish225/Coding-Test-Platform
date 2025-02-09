@@ -225,9 +225,12 @@ const Assessment = () => {
   };
 
   const handleFinalSubmit = async () => {
-    // Get all question details with their test results
+    // Add console log to debug submission data
+    console.log('Current submissions state:', submissions);
+    
     const submissionDetails = questions.map((question, index) => {
       const submission = submissions[index];
+      console.log(`Processing question ${index}:`, submission); // Debug log
       return {
         questionId: question.id,
         title: question.title,
@@ -259,7 +262,7 @@ const Assessment = () => {
       }
     };
     
-    console.log('Final submission:', submissionData);
+    console.log('Final submission data:', submissionData); // Debug log
     addSubmission(submissionData);
     setShowThankYouModal(true);
   };
