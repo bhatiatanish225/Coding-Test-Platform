@@ -225,39 +225,12 @@ const Assessment = () => {
   };
 
   const handleFinalSubmit = async () => {
-    // Get all question details with their test results
-    const submissionDetails = questions.map((question, index) => {
-      const submission = submissions[index];
-      return {
-        questionId: question.id,
-        title: question.title,
-        description: question.description,
-        code: submission?.code || '',
-        language: submission?.language || '',
-        passed: submission?.passed || false,
-        testResults: submission?.testResults || [],
-        totalTestCases: question.testCases.length,
-        passedTestCases: submission?.testResults?.filter(t => t.passed).length || 0
-      };
-    });
-
-    const totalTestCases = questions.reduce((acc, q) => acc + q.testCases.length, 0);
-    const passedTestCases = Object.values(submissions).reduce(
-      (acc, sub) => acc + (sub.testResults?.filter(t => t.passed).length || 0),
-      0
-    );
-
     const submissionData = {
-      id: Date.now().toString(),
+      id: Date.now().toString(), // Generate unique ID
       username: username,
       submittedAt: new Date().toISOString(),
       timeSpent: 3600 - timeLeft,
-      submissions: submissions,
-      detailedResults: submissionDetails,
-      overallScore: {
-        totalTestCases,
-        passedTestCases
-      }
+      submissions: submissions
     };
     
     console.log('Final submission:', submissionData);
