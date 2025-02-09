@@ -55,6 +55,11 @@ const AdminDashboard = () => {
     return `${passedTests}/${totalTests}`;
   };
 
+  const clearSubmissions = () => {
+    localStorage.removeItem('submissions');
+    window.location.reload();
+  };
+
   if (!isAuthenticated || !isAdmin) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -70,9 +75,17 @@ const AdminDashboard = () => {
   return (
     <div className="min-h-screen bg-gray-100">
       <nav className="bg-white shadow-md p-4">
-        <div className="container mx-auto flex items-center">
-          <Code2 className="h-6 w-6 text-purple-600 mr-2" />
-          <h1 className="text-xl font-bold">TechNova Admin Dashboard</h1>
+        <div className="container mx-auto flex items-center justify-between">
+          <div className="flex items-center">
+            <Code2 className="h-6 w-6 text-purple-600 mr-2" />
+            <h1 className="text-xl font-bold">TechNova Admin Dashboard</h1>
+          </div>
+          <button
+            onClick={clearSubmissions}
+            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+          >
+            Clear All Submissions
+          </button>
         </div>
       </nav>
 

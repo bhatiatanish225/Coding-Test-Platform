@@ -47,13 +47,19 @@ interface SubmissionContextType {
 const SubmissionContext = createContext<SubmissionContextType | undefined>(undefined);
 
 export const SubmissionProvider = ({ children }: { children: React.ReactNode }) => {
-  const [submissions, setSubmissions] = useState<Submission[]>([]);
+  // Initialize state from localStorage
+  const [submissions, setSubmissions] = useState<Submission[]>(() => {
+    const saved = localStorage.getItem('submissions');
+    return saved ? JSON.parse(saved) : [];
+  });
 
   const addSubmission = (submission: Submission) => {
-    console.log('Adding submission to context:', submission); // Debug log
+    console.log('Adding submission to context:', submission);
     setSubmissions(prev => {
       const newSubmissions = [...prev, submission];
-      console.log('Updated submissions list:', newSubmissions); // Debug log
+      // Save to localStorage
+      localStorage.setItem('submissions', JSON.stringify(newSubmissions));
+      console.log('Updated submissions list:', newSubmissions);
       return newSubmissions;
     });
   };
