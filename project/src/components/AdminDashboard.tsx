@@ -60,6 +60,12 @@ const AdminDashboard = () => {
     window.location.reload();
   };
 
+  const debugSubmissions = () => {
+    console.log('Current submissions:', submissions);
+    const stored = localStorage.getItem('submissions');
+    console.log('Stored submissions:', stored ? JSON.parse(stored) : 'none');
+  };
+
   if (!isAuthenticated || !isAdmin) {
     return (
       <div className="min-h-screen bg-gray-100 flex items-center justify-center">
@@ -80,12 +86,20 @@ const AdminDashboard = () => {
             <Code2 className="h-6 w-6 text-purple-600 mr-2" />
             <h1 className="text-xl font-bold">TechNova Admin Dashboard</h1>
           </div>
-          <button
-            onClick={clearSubmissions}
-            className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
-          >
-            Clear All Submissions
-          </button>
+          <div className="flex gap-2">
+            <button
+              onClick={debugSubmissions}
+              className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700"
+            >
+              Debug
+            </button>
+            <button
+              onClick={clearSubmissions}
+              className="px-4 py-2 bg-red-600 text-white rounded hover:bg-red-700"
+            >
+              Clear All Submissions
+            </button>
+          </div>
         </div>
       </nav>
 
