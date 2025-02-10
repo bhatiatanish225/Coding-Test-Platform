@@ -3,7 +3,7 @@ import CodeMirror from '@uiw/react-codemirror';
 import { cpp } from '@codemirror/lang-cpp';
 import { python } from '@codemirror/lang-python';
 import { vscodeDark } from '@uiw/codemirror-theme-vscode';
-import { Timer, Code2, CheckCircle, XCircle, Loader2 } from 'lucide-react';
+import { Timer, Code2, CheckCircle, XCircle, Loader2, AlertTriangle } from 'lucide-react';
 import { useNavigate } from 'react-router-dom';
 import { useSubmissions } from '../context/SubmissionContext';
 import { useAuth } from '../context/AuthContext';
@@ -128,6 +128,8 @@ const Assessment = () => {
   const { addSubmission } = useSubmissions();
   const { isAuthenticated } = useAuth();
   const [username, setUsername] = useState('anjum_test'); // or get from auth context
+  const [fullscreenWarnings, setFullscreenWarnings] = useState(0);
+  const [showWarningModal, setShowWarningModal] = useState(false);
 
   useEffect(() => {
     // Update code templates when changing questions
@@ -166,6 +168,51 @@ const Assessment = () => {
     const allPassed = Object.values(submissions).every(s => s.passed);
     setShowFinalSubmit(allSubmitted && allPassed);
   }, [submissions]);
+
+  useEffect(() => {
+    // Prevent exiting fullscreen
+    const handleFullscreenChange = async () => {
+      if (!document.fullscreenElement) {
+        try {
+          setFullscreenWarnings(prev => {
+            const newWarnings = prev + 1;
+            if (newWarnings >= 3) {
+              handleFinalSubmit();
+              return prev;
+            }
+            return newWarnings;
+          });
+          setShowWarningModal(true);
+          // Small delay to ensure smooth transition back to fullscreen
+          await new Promise(resolve => setTimeout(resolve, 500));
+          await document.documentElement.requestFullscreen();
+        } catch (err) {
+          console.error('Failed to return to fullscreen:', err);
+        }
+      }
+    };
+
+    // Prevent right click and copy-paste
+    const handleContextMenu = (e: MouseEvent) => {
+      e.preventDefault();
+    };
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if ((e.ctrlKey || e.metaKey) && (e.key === 'c' || e.key === 'C' || e.key === 'v' || e.key === 'V')) {
+        e.preventDefault();
+      }
+    };
+
+    document.addEventListener('fullscreenchange', handleFullscreenChange);
+    document.addEventListener('contextmenu', handleContextMenu);
+    document.addEventListener('keydown', handleKeyDown);
+
+    return () => {
+      document.removeEventListener('fullscreenchange', handleFullscreenChange);
+      document.removeEventListener('contextmenu', handleContextMenu);
+      document.removeEventListener('keydown', handleKeyDown);
+    };
+  }, []);
 
   const formatTime = (seconds: number) => {
     const minutes = Math.floor(seconds / 60);
@@ -442,6 +489,33 @@ const Assessment = () => {
                 <path className="checkmark__check" fill="none" stroke="#7e22ce" strokeWidth="2" d="M14.1 27.2l7.1 7.2 16.7-16.8"/>
               </svg>
             </div>
+          </div>
+        </div>
+      )}
+
+      {/* Warning Modal */}
+      {showWarningModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white p-8 rounded-lg shadow-xl max-w-md w-full mx-4">
+            <div className="text-center">
+              <AlertTriangle className="h-12 w-12 text-red-600 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-red-600 mb-4">Warning!</h2>
+              <p className="mb-4">
+                You have exited fullscreen mode. This is warning {fullscreenWarnings} of 3.
+              </p>
+              <p className="text-sm text-gray-600 mb-6">
+                Your test will be automatically submitted after 3 warnings.
+              </p>
+              <p className="font-medium">
+                Remaining warnings: {3 - fullscreenWarnings}
+              </p>
+            </div>
+            <button
+              onClick={() => setShowWarningModal(false)}
+              className="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition duration-200 mt-4"
+            >
+              I Understand
+            </button>
           </div>
         </div>
       )}
