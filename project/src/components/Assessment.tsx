@@ -11,46 +11,55 @@ import { useAuth } from '../context/AuthContext';
 const questions = [
   {
     id: 1,
-    title: 'Subarray Sum Equals K',
-    description: 'Given an array of integers nums and an integer k, return the total number of continuous subarrays whose sum equals k.',
+    title: 'Binary Tree Right Side View',
+    description: `Given the root of a binary tree, imagine yourself standing on the right side of it, return the values of the nodes you can see ordered from top to bottom.
+
+Constraints:
+- The number of nodes in the tree is in the range [0, 100]
+- -100 <= Node.val <= 100`,
     examples: [
       {
-        input: 'nums = [1,1,1], k = 2',
-        output: '2',
-        explanation: 'The subarray [1,1] appears twice, each time summing to k = 2.'
+        input: 'root = [1,2,3,null,5,null,4]',
+        output: '[1,3,4]',
+        explanation: 'When viewing from the right side, you can see nodes 1, 3, and 4.'
       },
       {
-        input: 'nums = [1,2,3], k = 3',
-        output: '2',
-        explanation: 'The subarrays [1,2] and [3] both sum to k = 3.'
+        input: 'root = [1,2,3,4,null,null,null,5]',
+        output: '[1,3,4,5]',
+        explanation: 'When viewing from the right side, you can see nodes 1, 3, 4, and 5.'
       }
     ],
-    testCases: [
-      { input: { nums: [1,1,1], k: 2 }, expected: "2" },
-      { input: { nums: [1,2,3], k: 3 }, expected: "2" },
-      { input: { nums: [1], k: 1 }, expected: "1" },
-      { input: { nums: [1,-1,0], k: 0 }, expected: "3" },
-      { input: { nums: [3,4,7,2,-3,1,4,2], k: 7 }, expected: "4" },
-      { input: { nums: [1,1,1,1,1], k: 3 }, expected: "3" },
-      { input: { nums: [10,2,-2,-20,10], k: -10 }, expected: "3" },
-      { input: { nums: [3,1,2,5,1], k: 8 }, expected: "2" },
-      { input: { nums: [-1,-1,1], k: 0 }, expected: "1" },
-      { input: { nums: [1,2,3,4,5], k: 9 }, expected: "2" }
-    ],
     templates: {
-      cpp: `class Solution {
+      cpp: `/**
+ * Definition for a binary tree node.
+ * struct TreeNode {
+ *     int val;
+ *     TreeNode *left;
+ *     TreeNode *right;
+ *     TreeNode() : val(0), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x) : val(x), left(nullptr), right(nullptr) {}
+ *     TreeNode(int x, TreeNode *left, TreeNode *right) : val(x), left(left), right(right) {}
+ * };
+ */
+class Solution {
 public:
-    int subarraySum(vector<int>& nums, int k) {
+    vector<int> rightSideView(TreeNode* root) {
         // Write your code here
-        // Return the total number of continuous subarrays whose sum equals k
-        return 0;
+        // Return the values visible from the right side
+        return {};
     }
 };`,
-      python: `class Solution:
-    def subarraySum(self, nums: List[int], k: int) -> int:
+      python: `# Definition for a binary tree node.
+# class TreeNode:
+#     def __init__(self, val=0, left=None, right=None):
+#         self.val = val
+#         self.left = left
+#         self.right = right
+class Solution:
+    def rightSideView(self, root: Optional[TreeNode]) -> List[int]:
         # Write your code here
-        # Return the total number of continuous subarrays whose sum equals k
-        return 0`
+        # Return the values visible from the right side
+        return []`
     }
   },
   {
@@ -130,6 +139,7 @@ const Assessment = () => {
   const [username, setUsername] = useState('anjum_test'); // or get from auth context
   const [fullscreenWarnings, setFullscreenWarnings] = useState(0);
   const [showWarningModal, setShowWarningModal] = useState(false);
+  const [showSuccessMessage, setShowSuccessMessage] = useState(false);
 
   useEffect(() => {
     // Update code templates when changing questions
@@ -220,97 +230,40 @@ const Assessment = () => {
     return `${minutes}:${remainingSeconds.toString().padStart(2, '0')}`;
   };
 
-  const validateTestCases = async () => {
-    setTestResults({ passing: false, loading: true, results: [] });
-    
-    // Simulate test case validation
-    await new Promise(resolve => setTimeout(resolve, 2000));
-    
-    // In a real implementation, this would send the code to a backend service
-    // for execution and validation against each test case
-    const currentTestCases = questions[currentQuestion].testCases;
-    
-    // For demonstration, we'll fail if the code is empty or just returns 0
-    const codeIsEmpty = code[language].includes('# Write your code here') || 
-                       code[language].includes('// Write your code here') ||
-                       code[language].includes('return 0');
-    
-    const results = currentTestCases.map(testCase => {
-      const passed = !codeIsEmpty && Math.random() > 0.7; // More realistic failure rate
-      return {
-        passed,
-        input: JSON.stringify(testCase.input),
-        expected: testCase.expected,
-        actual: passed ? testCase.expected : "0"
-      };
-    });
-    
-    const allPassed = results.every(r => r.passed);
-    setTestResults({ 
-      passing: allPassed, 
-      loading: false,
-      results
-    });
-    
-    return { passed: allPassed, results };
-  };
-
   const handleSubmitQuestion = async () => {
-    const result = await validateTestCases();
-    console.log('Question submission result:', result); // Debug log
+    // Remove test case validation
+    const submission = {
+      code: code[language],
+      language,
+      passed: true, // Always set to true since we're not validating
+      testResults: [] // Empty array since we're not running tests
+    };
+    
+    setSubmissions(prev => ({
+      ...prev,
+      [currentQuestion]: submission
+    }));
 
-    if (result.passed) {
-      const submission = {
-        code: code[language],
-        language,
-        passed: result.passed,
-        testResults: result.results
-      };
-      console.log('Adding submission for question:', currentQuestion, submission); // Debug log
-      setSubmissions(prev => ({
-        ...prev,
-        [currentQuestion]: submission
-      }));
-    }
+    // Show success message
+    setShowSuccessMessage(true);
+    setTimeout(() => {
+      setShowSuccessMessage(false);
+      if (currentQuestion < questions.length - 1) {
+        setCurrentQuestion(prev => prev + 1);
+      }
+    }, 2000);
   };
 
   const handleFinalSubmit = async () => {
-    // Get all question details with their test results
-    const submissionDetails = questions.map((question, index) => {
-      const submission = submissions[index];
-      return {
-        questionId: question.id,
-        title: question.title,
-        description: question.description,
-        code: submission?.code || '',
-        language: submission?.language || '',
-        passed: submission?.passed || false,
-        testResults: submission?.testResults || [],
-        totalTestCases: question.testCases.length,
-        passedTestCases: submission?.testResults?.filter(t => t.passed).length || 0
-      };
-    });
-
-    const totalTestCases = questions.reduce((acc, q) => acc + q.testCases.length, 0);
-    const passedTestCases = Object.values(submissions).reduce(
-      (acc, sub) => acc + (sub.testResults?.filter(t => t.passed).length || 0),
-      0
-    );
-
     const submissionData = {
       id: Date.now().toString(),
       username: username,
       submittedAt: new Date().toISOString(),
       timeSpent: 3600 - timeLeft,
-      submissions: submissions,
-      detailedResults: submissionDetails,
-      overallScore: {
-        totalTestCases,
-        passedTestCases
-      }
+      submissions: submissions
     };
     
-    console.log('Final submission data:', submissionData); // Debug log
+    console.log('Final submission:', submissionData);
     addSubmission(submissionData);
     setShowThankYouModal(true);
   };
@@ -427,7 +380,7 @@ const Assessment = () => {
                 disabled={testResults.loading || submissions[currentQuestion]?.passed}
                 className="px-4 py-2 bg-blue-600 text-white rounded hover:bg-blue-700 disabled:opacity-50"
               >
-                Submit Question
+                Submit Solution
               </button>
             </div>
 
@@ -516,6 +469,18 @@ const Assessment = () => {
             >
               I Understand
             </button>
+          </div>
+        </div>
+      )}
+
+      {/* Success message without test results */}
+      {showSuccessMessage && (
+        <div className="fixed inset-0 flex items-center justify-center z-50">
+          <div className="bg-white p-6 rounded-lg shadow-xl">
+            <div className="text-center">
+              <CheckCircle className="h-12 w-12 text-green-600 mx-auto mb-4" />
+              <h2 className="text-2xl font-bold text-green-600 mb-2">Solution Submitted!</h2>
+            </div>
           </div>
         </div>
       )}
